@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "723232938358",
+    "project_id": "scarecrow-e4060",
+    "storage_bucket": "scarecrow-e4060.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:723232938358:android:fe8b8954cebb70cd0c4257",
+        "android_client_info": {
+          "package_name": "com.example.senior_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfIdArfD9VJe-Sl5W9tXM4qQyMUXYsOHc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
