@@ -14,6 +14,56 @@ class DeviceDetailsScreen extends StatefulWidget {
 
 class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   bool _isServoLoading = false;
+  // --- إضافة متغيرات التحميل الجديدة ---
+  bool _isBuzzerLoading = false;
+  bool _isCameraLoading = false;
+
+  // --- وظيفة التحكم بالمنبه (Buzzer) ---
+  Future<void> _triggerBuzzer(int duration) async {
+    setState(() => _isBuzzerLoading = true);
+    try {
+      await FirebaseFirestore.instance
+          .collection('buzzer_control')
+          .doc('action')
+          .set({
+            'action': 'on',
+            'duration': duration,
+            'timestamp': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Buzzer Command Sent!')));
+      }
+    } finally {
+      await Future.delayed(const Duration(seconds: 2));
+      if (mounted) setState(() => _isBuzzerLoading = false);
+    }
+  }
+
+  // --- وظيفة التقاط صورة يدوية (Camera Control) ---
+  Future<void> _takeManualPhoto() async {
+    setState(() => _isCameraLoading = true);
+    try {
+      await FirebaseFirestore.instance
+          .collection('camera_control')
+          .doc('action')
+          .set({
+            'action': 'capture',
+            'timestamp': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Photo Request Sent!')));
+      }
+    } finally {
+      await Future.delayed(const Duration(seconds: 2));
+      if (mounted) setState(() => _isCameraLoading = false);
+    }
+  }
 
   Future<void> _triggerServo(int duration) async {
     setState(() => _isServoLoading = true);
@@ -41,7 +91,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.deviceId != 'raspberrypi') {
-      return _buildConnectingScreen(); // الكود الأصلي كما هو بالأسفل
+      return _buildConnectingScreen();
     }
 
     return Scaffold(
@@ -64,10 +114,15 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             children: [
               _buildImagePreview(),
               const SizedBox(height: 20),
-              _buildServoButton(),
-              const SizedBox(height: 25),
 
-              // --- إضافة الفلوتشارت هنا ---
+              // --- الأزرار الأصلية والمضافة حديثاً ---
+              _buildServoButton(),
+              const SizedBox(height: 10),
+              _buildBuzzerButton(), // إضافة زر الصوت
+              const SizedBox(height: 10),
+              _buildCameraButton(), // إضافة زر الكاميرا
+
+              const SizedBox(height: 25),
               const Text(
                 "Weekly Activity Status",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -76,11 +131,58 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
               _buildActivityChart(),
 
               const SizedBox(height: 25),
-              // --- زر الهيستوري في النهاية ---
               _buildHistoryButton(),
             ],
           );
         },
+      ),
+    );
+  }
+
+  // --- ودجت زر المنبه (Buzzer) ---
+  Widget _buildBuzzerButton() {
+    return ElevatedButton.icon(
+      onPressed: _isBuzzerLoading ? null : () => _triggerBuzzer(5),
+      icon: _isBuzzerLoading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            )
+          : const Icon(Icons.volume_up),
+      label: const Text("Sound Alarm (Buzzer)"),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.orange.shade700,
+        foregroundColor: Colors.white,
+        minimumSize: const Size(double.infinity, 55),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  // --- ودجت زر الكاميرا (Camera Capture) ---
+  Widget _buildCameraButton() {
+    return ElevatedButton.icon(
+      onPressed: _isCameraLoading ? null : _takeManualPhoto,
+      icon: _isCameraLoading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            )
+          : const Icon(Icons.camera_alt),
+      label: const Text("Capture Live Photo"),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue.shade700,
+        foregroundColor: Colors.white,
+        minimumSize: const Size(double.infinity, 55),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -120,11 +222,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   }
 
   Widget _buildActivityChart() {
-    // 1. تحديد تاريخ بداية "قبل 7 أيام" من اللحظة الحالية
     DateTime sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
 
     return StreamBuilder<QuerySnapshot>(
-      // 2. تعديل الـ Stream ليجلب فقط المستندات التي تاريخها أكبر من (sevenDaysAgo)
       stream: FirebaseFirestore.instance
           .collection('detections')
           .where('timestamp', isGreaterThanOrEqualTo: sevenDaysAgo)
@@ -148,7 +248,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
         }
 
         return Container(
-          height: 250, // زدنا الارتفاع قليلاً لتناسب الأرقام الجانبية
+          height: 250,
           padding: const EdgeInsets.only(
             top: 20,
             right: 20,
@@ -163,7 +263,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
           child: BarChart(
             BarChartData(
               alignment: BarChartAlignment.spaceAround,
-              maxY: 100, // الحد الأقصى 100 كما طلبت
+              maxY: 100,
               minY: 0,
               barGroups: dayCounts.entries
                   .map(
@@ -173,8 +273,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                         BarChartRodData(
                           toY: e.value.toDouble() > 100
                               ? 100
-                              : e.value
-                                    .toDouble(), // للتأكد أن العمود لا يتجاوز الـ 100
+                              : e.value.toDouble(),
                           color: Colors.green,
                           width: 14,
                           borderRadius: const BorderRadius.only(
@@ -188,12 +287,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                   .toList(),
               titlesData: FlTitlesData(
                 show: true,
-                // إعدادات الأرقام على اليسار (0, 10, 20...100)
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
                     reservedSize: 35,
-                    interval: 10, // التقسيم عشرات
+                    interval: 10,
                     getTitlesWidget: (value, meta) {
                       return Text(
                         value.toInt().toString(),
@@ -233,7 +331,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
               gridData: FlGridData(
                 show: true,
                 drawVerticalLine: false,
-                horizontalInterval: 10, // رسم خطوط أفقية عند كل 10
+                horizontalInterval: 10,
                 getDrawingHorizontalLine: (value) =>
                     FlLine(color: Colors.grey.shade100, strokeWidth: 1),
               ),
@@ -250,7 +348,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
       },
     );
   }
-  // --- دوال الـ Build الأخرى (Image, Servo, History) بقيت كما هي في كودك الأصلي ---
 
   Widget _buildImagePreview() {
     return StreamBuilder<QuerySnapshot>(
