@@ -1,17 +1,7 @@
 import 'package:flutter/material.dart';
-// إذا بدك تضيف رابط خارجي (مثل موقع أو إيميل)، أضف هذا:
-// import 'package:url_launcher/url_launcher.dart';
 
 class AboutAppScreen extends StatelessWidget {
   const AboutAppScreen({super.key});
-
-  // دالة لفتح رابط خارجي (اختياري)
-  // Future<void> _launchUrl(String url) async {
-  //   final Uri uri = Uri.parse(url);
-  //   if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-  //     throw Exception('Could not launch $url');
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +18,6 @@ class AboutAppScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
 
-            // شعار التطبيق (اختياري - غيّر الصورة حسب مشروعك)
-            // CircleAvatar(
-            //   radius: 60,
-            //   backgroundImage: AssetImage('assets/images/app_logo.png'),
-            //   backgroundColor: Colors.transparent,
-            // ),
-            // أو أيقونة بسيطة إذا ما عندك شعار
             const Icon(
               Icons.app_registration_rounded,
               size: 100,
@@ -44,7 +27,7 @@ class AboutAppScreen extends StatelessWidget {
             const SizedBox(height: 30),
 
             const Text(
-              'My Awesome App', // ← غيّر الاسم لاسم تطبيقك الحقيقي
+              'My ScareCrow App',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -55,11 +38,8 @@ class AboutAppScreen extends StatelessWidget {
             const SizedBox(height: 10),
 
             const Text(
-              'Version 1.0.0', // ← عدّل الإصدار حسب تطبيقك
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
-              ),
+              'Version 1.0.0',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
 
             const SizedBox(height: 30),
@@ -88,7 +68,6 @@ class AboutAppScreen extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            // بريد إلكتروني للدعم (اضغط عليه يفتح الإيميل)
             GestureDetector(
               onTap: () {
                 // _launchUrl('mailto:support@yourapp.com');
@@ -98,7 +77,7 @@ class AboutAppScreen extends StatelessWidget {
                 );
               },
               child: const Text(
-                'support@yourapp.com', // ← غيّر الإيميل
+                'support@smartapp.com',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.blue,
@@ -109,23 +88,10 @@ class AboutAppScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // رابط موقع (اختياري)
-            // GestureDetector(
-            //   onTap: () => _launchUrl('https://www.yourapp.com'),
-            //   child: const Text(
-            //     'www.yourapp.com',
-            //     style: TextStyle(
-            //       fontSize: 16,
-            //       color: Colors.blue,
-            //       decoration: TextDecoration.underline,
-            //     ),
-            //   ),
-            // ),
-
             const SizedBox(height: 40),
 
             const Text(
-              '© 2025 Your Company Name. All rights reserved.', // ← غيّر السنة والشركة
+              '© 2026 Your Company Name. All rights reserved.',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],

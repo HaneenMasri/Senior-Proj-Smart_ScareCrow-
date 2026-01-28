@@ -14,11 +14,10 @@ class DeviceDetailsScreen extends StatefulWidget {
 
 class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   bool _isServoLoading = false;
-  // --- إضافة متغيرات التحميل الجديدة ---
+
   bool _isBuzzerLoading = false;
   bool _isCameraLoading = false;
 
-  // --- وظيفة التحكم بالمنبه (Buzzer) ---
   Future<void> _triggerBuzzer(int duration) async {
     setState(() => _isBuzzerLoading = true);
     try {

@@ -10,15 +10,16 @@ import 'screens/change_password_screen.dart';
 import 'screens/delete_account_screen.dart';
 import 'screens/about_app_screen.dart';
 import 'screens/register_screen.dart';
+import 'app/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // --- الحل لمشكلة الويب (Status 400) يبدأ من هنا ---
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: false, // تعطيل التخزين المؤقت يحل مشاكل الويب غالباً
   );
   // --- نهاية التعديل ---
+  await NotificationService.init();
   runApp(const MyApp());
 }
 
