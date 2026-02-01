@@ -11,14 +11,23 @@ import 'screens/delete_account_screen.dart';
 import 'screens/about_app_screen.dart';
 import 'screens/register_screen.dart';
 import 'app/notification_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print("Handling a background message: ${message.messageId}");
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   FirebaseFirestore.instance.settings = const Settings(
-    persistenceEnabled: false, // تعطيل التخزين المؤقت يحل مشاكل الويب غالباً
+    persistenceEnabled: false,
   );
-  // --- نهاية التعديل ---
   await NotificationService.init();
   runApp(const MyApp());
 }
