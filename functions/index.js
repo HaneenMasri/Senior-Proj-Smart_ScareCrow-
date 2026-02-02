@@ -20,7 +20,7 @@ exports.sendNotificationOnDetection = functions.firestore
         imageUrl: imageUrl,
         click_action: "FLUTTER_NOTIFICATION_CLICK",
       },
-      topic: "scarecrow_alerts",
+      token: "Test ", // بدل topic
     };
 
     try {
