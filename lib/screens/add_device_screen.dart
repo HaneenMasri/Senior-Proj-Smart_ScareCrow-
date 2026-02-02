@@ -2,21 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AddDeviceScreen extends StatefulWidget {
-  const AddDeviceScreen({super.key});
+  final String? existingId; // معرف الجهاز للتعديل
+  final String? existingName; // اسم الجهاز للتعديل
+
+  const AddDeviceScreen({super.key, this.existingId, this.existingName});
 
   @override
   State<AddDeviceScreen> createState() => _AddDeviceScreenState();
 }
 
 class _AddDeviceScreenState extends State<AddDeviceScreen> {
-  final TextEditingController _idController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
+  late final TextEditingController _idController;
+  late final TextEditingController _nameController;
 
   String? _idError;
   String? _nameError;
   bool _isLoading = false;
 
-  Future<void> _addDevice() async {
+  // هل نحن في وضع التعديل؟
+  bool get isEditMode => widget.existingId != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _idController = TextEditingController(text: widget.existingId);
+    _nameController = TextEditingController(text: widget.existingName);
+  }
+
+  Future<void> _saveDevice() async {
     final String deviceId = _idController.text.trim();
     final String deviceName = _nameController.text.trim();
 
@@ -30,22 +43,31 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // حفظ البيانات الأساسية في المسار المتفق عليه
-      await FirebaseFirestore.instance
-          .collection('pi-devices')
-          .doc(deviceId)
-          .set({'deviceId': deviceId, 'name': deviceName});
+      // في وضع التعديل نستخدم .update لتجنب الكتابة فوق الحقول الأخرى غير الموجودة هنا
+      if (isEditMode) {
+        await FirebaseFirestore.instance
+            .collection('pi-devices')
+            .doc(deviceId)
+            .update({'name': deviceName});
+      } else {
+        // وضع الإضافة الجديد
+        await FirebaseFirestore.instance
+            .collection('pi-devices')
+            .doc(deviceId)
+            .set({'deviceId': deviceId, 'name': deviceName});
 
-      await FirebaseFirestore.instance
-          .collection('pi-devices')
-          .doc(deviceId)
-          .collection('motionEvents')
-          .add({
-            'deviceId': deviceId,
-            'ts': FieldValue.serverTimestamp(),
-            'gpio': 17,
-            'state': 'initialized',
-          });
+        // إضافة سجل البداية فقط عند الإضافة لأول مرة
+        await FirebaseFirestore.instance
+            .collection('pi-devices')
+            .doc(deviceId)
+            .collection('motionEvents')
+            .add({
+              'deviceId': deviceId,
+              'ts': FieldValue.serverTimestamp(),
+              'gpio': 17,
+              'state': 'initialized',
+            });
+      }
 
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -59,23 +81,23 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(' New Device'),
+        title: Text(isEditMode ? 'Edit Device' : 'New Device'),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Color(0xFF2E7D32),
         foregroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         child: Column(
           children: [
-            // 1. أيقونة كبيرة في الأعلى لتعزيز شكل الصفحة
             const SizedBox(height: 20),
             Icon(
-              Icons.sensors_rounded, // أيقونة تعبر عن الحساسات والاتصال
+              isEditMode ? Icons.edit_note_rounded : Icons.sensors_rounded,
               size: 100,
               color: Colors.green.shade700,
             ),
+            const SizedBox(height: 10),
             const SizedBox(height: 10),
             const Text(
               "Setup Your Scarecrow",
@@ -86,31 +108,25 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 40),
-
             TextField(
               controller: _idController,
+              enabled: !isEditMode,
               decoration: InputDecoration(
-                labelText: 'Device ID', // العنوان الذي سيظهر فوق
-                hintText: 'e.g. Scarecrow-01', // النص الذي سيظهر داخل
-                floatingLabelBehavior:
-                    FloatingLabelBehavior.always, // جعله دائماً فوق
+                labelText: 'Device ID',
                 prefixIcon: const Icon(Icons.qr_code_scanner),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
                 errorText: _idError,
+                filled: isEditMode,
+                fillColor: isEditMode ? Colors.grey[100] : null,
               ),
             ),
-
             const SizedBox(height: 25),
-
-            // 3. حقل الاسم (Device Name) بنفس التنسيق
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
                 labelText: 'Device Name',
-                hintText: 'e.g. Front Garden Camera',
-                floatingLabelBehavior: FloatingLabelBehavior.always,
                 prefixIcon: const Icon(Icons.badge_outlined),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
@@ -118,15 +134,12 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                 errorText: _nameError,
               ),
             ),
-
             const SizedBox(height: 40),
-
-            // زر الإضافة بتصميم عصري
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _addDevice,
+                onPressed: _isLoading ? null : _saveDevice,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green.shade700,
                   foregroundColor: Colors.white,
@@ -137,9 +150,9 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'Add device',
-                        style: TextStyle(
+                    : Text(
+                        isEditMode ? 'Update Device' : 'Add Device',
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),

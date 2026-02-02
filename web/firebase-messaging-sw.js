@@ -1,7 +1,7 @@
+//web/icons/firebase-messaging-sw.js
 importScripts("https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js");
 
-// هذه هي البيانات التي نسختها أنت
 const firebaseConfig = {
   apiKey: "AIzaSyDCkxmWygh-ybEmYO9vOhBzlaOaf4VUV4g",
   authDomain: "scarecrow-e4060.firebaseapp.com",
@@ -15,7 +15,6 @@ firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 
-// لتلقي الرسائل في الخلفية
 messaging.onBackgroundMessage((payload) => {
   console.log("Message received in background: ", payload);
 });

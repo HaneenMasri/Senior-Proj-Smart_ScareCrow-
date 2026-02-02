@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../screens/login_screen.dart'; // تأكد من المسار الصحيح لشاشة Login
+import '../screens/login_screen.dart';
 
 class DeleteAccountScreen extends StatefulWidget {
   const DeleteAccountScreen({super.key});
@@ -20,7 +20,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   @override
   void initState() {
     super.initState();
-    // عبي الإيميل تلقائيًا من المستخدم المسجل
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && user.email != null) {
       _emailController.text = user.email!;
@@ -36,7 +35,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   }
 
   void _deleteAccount() async {
-    // تحقق إضافي إن المستخدم كتب "DELETE" بالضبط
     if (_confirmController.text.trim().toUpperCase() != 'DELETE') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -58,7 +56,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
         );
       }
 
-      // إعادة المصادقة بكلمة السر الحالية (أمان عالي)
       final credential = EmailAuthProvider.credential(
         email: _emailController.text.trim(),
         password: _passwordController.text,
@@ -66,7 +63,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
 
       await user.reauthenticateWithCredential(credential);
 
-      // حذف الحساب نهائيًا من Firebase
       await user.delete();
 
       if (mounted) {
@@ -77,7 +73,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
           ),
         );
 
-        // روح على شاشة الـ Login وامسح كل الستاك
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -152,7 +147,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
             ),
             const SizedBox(height: 30),
 
-            // Email (معبى تلقائيًا)
             TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
@@ -164,7 +158,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Current Password مع أيقونة العين
             TextField(
               controller: _passwordController,
               obscureText: _obscurePassword,
@@ -183,7 +176,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
             ),
             const SizedBox(height: 30),
 
-            // تأكيد الكتابة "DELETE"
             const Text(
               'To confirm, type the word DELETE in the field below:',
               style: TextStyle(fontWeight: FontWeight.bold),
@@ -200,7 +192,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
             ),
             const SizedBox(height: 40),
 
-            // زر الحذف
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

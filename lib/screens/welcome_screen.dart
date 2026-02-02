@@ -49,7 +49,6 @@ class WelcomeScreen extends StatelessWidget {
 
                 const SizedBox(height: 60),
 
-                // الزر الأخضر الفخم
                 SizedBox(
                   width: double.infinity,
                   height: 60,

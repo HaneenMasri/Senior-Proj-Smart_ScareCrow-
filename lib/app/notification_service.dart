@@ -11,10 +11,8 @@ class NotificationService {
   static const String channelId = 'scarecrow_channel';
 
   static Future<void> init() async {
-    // 1️⃣ طلب الإذن (لوجيك فقط)
     await _messaging.requestPermission(alert: true, badge: true, sound: true);
 
-    // 2️⃣ إنشاء Notification Channel (إجباري)
     if (!kIsWeb) {
       const AndroidNotificationChannel channel = AndroidNotificationChannel(
         channelId,
@@ -30,7 +28,6 @@ class NotificationService {
           ?.createNotificationChannel(channel);
     }
 
-    // 3️⃣ تهيئة local notifications
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -38,16 +35,13 @@ class NotificationService {
       const InitializationSettings(android: androidSettings),
     );
 
-    // 4️⃣ الحصول على Token
     final token = await _messaging.getToken();
     debugPrint('FCM Token: $token');
 
-    // 5️⃣ الاشتراك في Topic (Mobile فقط)
     if (!kIsWeb) {
       await _messaging.subscribeToTopic('scarecrow_alerts');
     }
 
-    // 6️⃣ Foreground listener
     FirebaseMessaging.onMessage.listen(_showNotification);
   }
 

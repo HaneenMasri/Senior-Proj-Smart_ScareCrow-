@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../screens/login_screen.dart'; // تأكد من المسار الصحيح
+import '../screens/login_screen.dart';
 
 class UpdateUsernameScreen extends StatefulWidget {
   const UpdateUsernameScreen({super.key});
@@ -17,7 +17,7 @@ class _UpdateUsernameScreenState extends State<UpdateUsernameScreen> {
   final _newUsernameController = TextEditingController();
 
   bool _isLoading = false;
-  bool _obscurePassword = true; // لإخفاء/إظهار كلمة السر
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -79,10 +79,9 @@ class _UpdateUsernameScreenState extends State<UpdateUsernameScreen> {
           ),
         );
 
-        // تمسح الحقول بعد النجاح
         _clearFields();
 
-        Navigator.pop(context); // رجوع للإعدادات
+        Navigator.pop(context);
       }
     } on FirebaseAuthException catch (e) {
       String message;
@@ -165,10 +164,9 @@ class _UpdateUsernameScreenState extends State<UpdateUsernameScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Current Password مع أيقونة العين
               TextFormField(
                 controller: _currentPasswordController,
-                obscureText: _obscurePassword, // يخفي أو يظهر حسب المتغيّر
+                obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: 'Current Password',
                   prefixIcon: const Icon(Icons.lock),
@@ -181,7 +179,7 @@ class _UpdateUsernameScreenState extends State<UpdateUsernameScreen> {
                     ),
                     onPressed: () {
                       setState(() {
-                        _obscurePassword = !_obscurePassword; // يقلب الحالة
+                        _obscurePassword = !_obscurePassword;
                       });
                     },
                   ),
@@ -195,7 +193,6 @@ class _UpdateUsernameScreenState extends State<UpdateUsernameScreen> {
               ),
               const SizedBox(height: 20),
 
-              // New Username Field
               TextFormField(
                 controller: _newUsernameController,
                 decoration: const InputDecoration(

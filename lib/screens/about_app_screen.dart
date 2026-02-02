@@ -45,12 +45,11 @@ class AboutAppScreen extends StatelessWidget {
             const SizedBox(height: 30),
 
             const Text(
-              'Welcome to My Awesome App!\n\n'
-              'This application is designed to help you manage your tasks efficiently '
-              'and stay organized in your daily life.\n\n'
-              'We are constantly working to improve the user experience and add new features '
-              'based on your feedback.\n\n'
-              'Thank you for using our app!',
+              'Welcome to Smart Scarecrow App!\n\n'
+              'This app helps you monitor your crops and protect them from birds and animals.\n\n'
+              'You can control the smart scarecrow, view alerts, and check the status of your fields in real-time.\n\n'
+              'Thank you for using the Smart Scarecrow App!',
+
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, height: 1.6),
             ),
@@ -70,8 +69,6 @@ class AboutAppScreen extends StatelessWidget {
 
             GestureDetector(
               onTap: () {
-                // _launchUrl('mailto:support@yourapp.com');
-                // أو نسخة بسيطة بدون url_launcher:
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Opening email client...')),
                 );
@@ -91,7 +88,7 @@ class AboutAppScreen extends StatelessWidget {
             const SizedBox(height: 40),
 
             const Text(
-              '© 2026 Your Company Name. All rights reserved.',
+              '© 2026 Smart Scarecrow Project. All rights reserved.',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],

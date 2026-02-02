@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../screens/login_screen.dart'; // تأكد من المسار الصحيح لشاشة الـ Login
+import '../screens/login_screen.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -25,7 +25,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   @override
   void initState() {
     super.initState();
-    // عبي الإيميل تلقائيًا (اختياري، بس كويس)
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && user.email != null) {
       _emailController.text = user.email!;
@@ -57,7 +56,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         );
       }
 
-      // إعادة المصادقة بكلمة السر الحالية
       final credential = EmailAuthProvider.credential(
         email: _emailController.text.trim(),
         password: _currentPasswordController.text,
@@ -65,7 +63,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
       await user.reauthenticateWithCredential(credential);
 
-      // تغيير كلمة السر الجديدة
       await user.updatePassword(_newPasswordController.text);
 
       if (mounted) {
@@ -75,7 +72,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context); // رجوع للإعدادات
+        Navigator.pop(context);
       }
     } on FirebaseAuthException catch (e) {
       String message;
@@ -83,7 +80,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         message = 'Current password is incorrect';
       } else if (e.code == 'requires-recent-login') {
         message = 'Session expired. Please log in again to change password.';
-        // رجعه لشاشة الـ Login
         if (mounted) {
           Navigator.pushAndRemoveUntil(
             context,
@@ -91,7 +87,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             (route) => false,
           );
         }
-        return; // وقف هون
+        return;
       } else if (e.code == 'weak-password') {
         message = 'New password is too weak';
       } else {
@@ -114,7 +110,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // الـ UI تبعك الأصلي ما تغير خالص (نفس الحقول والأزرار والستايل)
     return Scaffold(
       appBar: AppBar(
         title: const Text('Change Password'),
@@ -138,8 +133,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
-
-              // Email Field (نفس الأصلي)
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -162,7 +155,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Current Password (نفس الأصلي)
               TextFormField(
                 controller: _currentPasswordController,
                 obscureText: _obscureCurrent,
@@ -184,7 +176,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               const SizedBox(height: 20),
 
-              // New Password (نفس الأصلي)
               TextFormField(
                 controller: _newPasswordController,
                 obscureText: _obscureNew,
@@ -211,7 +202,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Confirm New Password (نفس الأصلي)
               TextFormField(
                 controller: _confirmPasswordController,
                 obscureText: _obscureConfirm,
@@ -233,7 +223,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               const SizedBox(height: 40),
 
-              // زر Change Password (نفس الأصلي)
               ElevatedButton(
                 onPressed: _isLoading ? null : _changePassword,
                 style: ElevatedButton.styleFrom(

@@ -29,15 +29,12 @@ class _DetectedMovementsScreenState extends State<DetectedMovementsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // --- التعديل الجوهري هنا لضبط الزمن ---
     DateTime now = DateTime.now();
     DateTime filterDate;
 
     if (_selectedRange == '1') {
-      // إذا تم اختيار "آخر 24 ساعة"، نجعل الفلترة تبدأ من بداية اليوم الحالي (12:00 AM)
       filterDate = DateTime(now.year, now.month, now.day);
     } else {
-      // الخيارات الأخرى تحسب عدد الأيام للوراء من لحظة بداية اليوم الحالي
       filterDate = DateTime(
         now.year,
         now.month,

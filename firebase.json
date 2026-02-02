@@ -1,1 +1,40 @@
-{"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"scarecrow-e4060","configurations":{"android":"1:723232938358:android:fe8b8954cebb70cd0c4257","ios":"1:723232938358:ios:91fa39af028f2e460c4257","web":"1:723232938358:web:243e8394dc851d2e0c4257"}}},"android":{"default":{"projectId":"scarecrow-e4060","appId":"1:723232938358:android:fe8b8954cebb70cd0c4257","fileOutput":"android/app/google-services.json"}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "scarecrow-e4060",
+          "configurations": {
+            "android": "1:723232938358:android:fe8b8954cebb70cd0c4257",
+            "ios": "1:723232938358:ios:91fa39af028f2e460c4257",
+            "web": "1:723232938358:web:243e8394dc851d2e0c4257"
+          }
+        }
+      },
+      "android": {
+        "default": {
+          "projectId": "scarecrow-e4060",
+          "appId": "1:723232938358:android:fe8b8954cebb70cd0c4257",
+          "fileOutput": "android/app/google-services.json"
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    }
+  ]
+}

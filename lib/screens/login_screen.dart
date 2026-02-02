@@ -17,8 +17,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String? errorMessage;
   bool isLoading = false;
-
-  // المتغير المسؤول عن إظهار وإخفاء كلمة المرور
   bool _isObscured = true;
 
   @override
@@ -68,7 +66,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // الخلفية الفخمة
           Image.network(
             'https://png.pngtree.com/png-vector/20250925/ourmid/pngtree-halloween-scarecrow-png-image_17572335.webp',
             width: double.infinity,
@@ -97,7 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 50),
 
-                // Email Field
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -115,16 +111,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Password Field
                 TextField(
                   controller: _passwordController,
-                  obscureText: _isObscured, // تم الربط بالمتغير هنا
+                  obscureText: _isObscured,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'Password',
                     hintStyle: const TextStyle(color: Colors.white70),
                     prefixIcon: const Icon(Icons.lock, color: Colors.white),
-                    // تم تحويل الأيقونة لزر تفاعلي
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isObscured ? Icons.visibility_off : Icons.visibility,
@@ -144,7 +138,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                // رسالة الخطأ
                 if (errorMessage != null) ...[
                   const SizedBox(height: 20),
                   Text(
@@ -160,7 +153,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 40),
 
-                // زر الدخول
                 SizedBox(
                   width: double.infinity,
                   height: 60,

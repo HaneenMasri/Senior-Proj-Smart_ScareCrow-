@@ -17,7 +17,6 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // إعداد حركة الظهور التدريجي
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -25,7 +24,6 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
 
-    // مدة الانتظار قبل الانتقال
     Future.delayed(const Duration(seconds: 4), () {
       if (mounted) {
         Navigator.pushReplacement(
@@ -50,7 +48,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    // تحديد اللون الأساسي الجديد لسهولة استخدامه
     final primaryColor = Colors.orange.shade400;
 
     return Scaffold(
@@ -89,7 +86,6 @@ class _SplashScreenState extends State<SplashScreen>
 
               const SizedBox(height: 30),
 
-              // العنوان - تم تغيير اللون للأرجواني shade400
               Text(
                 'SCARECROW AI',
                 style: TextStyle(

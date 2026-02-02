@@ -19,7 +19,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? errorMessage;
   bool isLoading = false;
 
-  // متغيرات حالة إظهار/إخفاء كلمة المرور (شغالة الآن)
   bool _isObscured = true;
   bool _isConfirmObscured = true;
 
@@ -78,7 +77,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. صورة الخلفية
           Image.network(
             'https://png.pngtree.com/png-vector/20250925/ourmid/pngtree-halloween-scarecrow-png-image_17572335.webp',
             width: double.infinity,
@@ -86,14 +84,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             fit: BoxFit.cover,
           ),
 
-          // 2. الطبقة السوداء (تمت إعادتها كما طلبت)
-          Container(
-            color: Colors.black.withOpacity(
-              0.6,
-            ), // يمكنك تعديل الرقم 0.6 للتحكم في درجة التعتيم
-          ),
+          Container(color: Colors.black.withOpacity(0.6)),
 
-          // 3. المحتوى
           SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 80),
@@ -115,7 +107,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 50),
 
-                  // Email Field
                   TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -133,7 +124,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Password Field (تم إصلاح زر العين هنا)
                   TextField(
                     controller: _passwordController,
                     obscureText: _isObscured,
@@ -162,7 +152,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Confirm Password Field (تم إصلاح زر العين هنا)
                   TextField(
                     controller: _confirmPasswordController,
                     obscureText: _isConfirmObscured,
@@ -209,8 +198,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ],
 
                   const SizedBox(height: 40),
-
-                  // زر التسجيل
                   SizedBox(
                     width: double.infinity,
                     height: 60,

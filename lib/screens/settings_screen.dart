@@ -37,9 +37,8 @@ class SettingsScreen extends StatelessWidget {
           title: const Text("Logout"),
           leading: const Icon(Icons.logout, color: Colors.red),
           onTap: () async {
-            // هون بنعمل الـ Logout
             try {
-              await authService.value.signOut(); // تسجيل الخروج من Firebase
+              await authService.value.signOut();
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (context) => const LoginScreen()),
                 (route) => false,

@@ -9,11 +9,9 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // تم تغيير الخلفية لتناسب الثيم الأخضر الفاتح
       backgroundColor: const Color(0xFFF1F8E9),
       appBar: AppBar(
         title: const Text('Smart Scarecrow'),
-        // تغيير اللون إلى الأخضر الغامق
         backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -29,7 +27,6 @@ class HomeScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                // تغيير لون النص للأخضر الداكن
                 color: Color(0xFF2E7D32),
               ),
             ),
@@ -88,7 +85,6 @@ class TodayDetectionsCard extends StatelessWidget {
             child: ListTile(
               leading: Icon(
                 Icons.analytics,
-                // تغيير لون الأيقونة للأخضر
                 color: Colors.green.shade600,
                 size: 30,
               ),
@@ -101,7 +97,6 @@ class TodayDetectionsCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  // تغيير لون الرقم للأخضر
                   color: Colors.green.shade900,
                 ),
               ),
@@ -131,7 +126,6 @@ class DailyTipCard extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            // تغيير التدرج اللوني للأخضر
             gradient: LinearGradient(
               colors: [Colors.green.shade700, Colors.green.shade400],
             ),
@@ -193,7 +187,6 @@ class RecentDetectionsList extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                // تغيير اللون للأخضر الداكن
                 color: Color(0xFF1B5E20),
               ),
             ),
@@ -215,7 +208,6 @@ class RecentDetectionsList extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(15),
-                    // إضافة ظل خفيف للكرت ليعطي مظهراً أرقى
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),

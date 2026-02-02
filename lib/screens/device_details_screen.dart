@@ -41,7 +41,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     }
   }
 
-  // --- وظيفة التقاط صورة يدوية (Camera Control) ---
   Future<void> _takeManualPhoto() async {
     setState(() => _isCameraLoading = true);
     try {
@@ -114,12 +113,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
               _buildImagePreview(),
               const SizedBox(height: 20),
 
-              // --- الأزرار الأصلية والمضافة حديثاً ---
               _buildServoButton(),
               const SizedBox(height: 10),
-              _buildBuzzerButton(), // إضافة زر الصوت
+              _buildBuzzerButton(),
               const SizedBox(height: 10),
-              _buildCameraButton(), // إضافة زر الكاميرا
+              _buildCameraButton(),
 
               const SizedBox(height: 25),
               const Text(
@@ -138,7 +136,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     );
   }
 
-  // --- ودجت زر المنبه (Buzzer) ---
   Widget _buildBuzzerButton() {
     return ElevatedButton.icon(
       onPressed: _isBuzzerLoading ? null : () => _triggerBuzzer(5),
@@ -162,7 +159,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     );
   }
 
-  // --- ودجت زر الكاميرا (Camera Capture) ---
   Widget _buildCameraButton() {
     return ElevatedButton.icon(
       onPressed: _isCameraLoading ? null : _takeManualPhoto,
@@ -186,12 +182,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     );
   }
 
-  // الكود الأصلي لشاشة الانتظار دون أي تغيير
   Widget _buildConnectingScreen() {
     return Scaffold(
       appBar: AppBar(
         title: Text("New Device: ${widget.deviceId}"),
-        backgroundColor: Colors.grey.shade700,
+        backgroundColor: Color(0xFF2E7D32),
       ),
       body: Center(
         child: Column(
@@ -199,7 +194,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
           children: [
             const CircularProgressIndicator(color: Colors.green),
             const SizedBox(height: 24),
-            const Icon(Icons.router_outlined, size: 80, color: Colors.grey),
+            const Icon(
+              Icons.router_outlined,
+              size: 80,
+              color: Color(0xFF2E7D32),
+            ),
             const SizedBox(height: 16),
             const Text(
               "Connecting...",
@@ -230,11 +229,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) return const Text("Error loading chart");
-        if (!snapshot.hasData)
+        if (!snapshot.hasData) {
           return const SizedBox(
             height: 150,
             child: Center(child: CircularProgressIndicator()),
           );
+        }
 
         Map<int, int> dayCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0};
 
