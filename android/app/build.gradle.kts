@@ -1,4 +1,3 @@
-
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -17,6 +16,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true 
     }
 
     kotlinOptions {
@@ -24,18 +24,16 @@ android {
     }
 
     defaultConfig {
-    applicationId "com.example.senior_app"
-    minSdkVersion 21     
-    targetSdkVersion 33   
-    versionCode 1
-    versionName "1.0"
-}
-
+        applicationId = "com.example.senior_app"
+        minSdkVersion(23) 
+        targetSdkVersion(33)
+        versionCode = 1
+        versionName = "1.0"
+        multiDexEnabled = true 
+    }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -43,4 +41,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 }

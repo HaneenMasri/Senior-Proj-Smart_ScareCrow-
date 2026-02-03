@@ -4,9 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart'
-    show kIsWeb; // ضروري للتمييز بين الويب والموبايل
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'screens/splash_screen.dart';
 import 'screens/update_username_screen.dart';
 import 'screens/change_password_screen.dart';
@@ -15,6 +13,25 @@ import 'screens/about_app_screen.dart';
 import 'screens/register_screen.dart';
 import 'app/notification_service.dart';
 
+// --- إضافة دالة حفظ التوكن الجديدة ---
+Future<void> saveTokenToDatabase() async {
+  try {
+    // جلب التوكن الخاص بالجهاز الحالي (سواء محاكي أو APK)
+    String? token = await FirebaseMessaging.instance.getToken();
+    if (token != null) {
+      // تخزين التوكن في Firestore ليقرأه السيرفر تلقائياً
+      await FirebaseFirestore.instance
+          .collection('users_tokens')
+          .doc('admin_user')
+          .set({'token': token, 'updatedAt': FieldValue.serverTimestamp()});
+      print("✅ FCM Token updated in Firestore: $token");
+    }
+  } catch (e) {
+    print("❌ Error saving token: $e");
+  }
+}
+// ------------------------------------
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -22,14 +39,17 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 void main() async {
-  // 1. تهيئة واحدة فقط في البداية
+  // 1. التهيئة الأساسية
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // 2. إعداد الرسائل في الخلفية
+  // 2. تحديث التوكن تلقائياً (الحل السحري للـ APK)
+  await saveTokenToDatabase();
+
+  // 3. إعداد الرسائل في الخلفية
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // 3. الاشتراك بالـ topic (مع حماية للويب)
+  // 4. الاشتراك بالـ topic (كودك الأصلي)
   if (!kIsWeb) {
     try {
       await FirebaseMessaging.instance.subscribeToTopic('scarecrow_alerts');
@@ -41,7 +61,7 @@ void main() async {
     print('Topic subscription skipped: Not supported on Web.');
   }
 
-  // 4. إعدادات الفايرستور والاشعارات
+  // 5. إعدادات Firestore (كودك الأصلي)
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: false,
   );
@@ -59,11 +79,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'ScareCrow Application',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        useMaterial3: true,
-        // إضافة خطوط متناسقة مع الثيم الأخضر
-      ),
+      theme: ThemeData(primarySwatch: Colors.green, useMaterial3: true),
       home: const SplashScreen(),
       onGenerateRoute: (RouteSettings settings) {
         switch (settings.name) {

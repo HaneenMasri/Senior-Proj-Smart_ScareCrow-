@@ -1,33 +1,46 @@
-const functions = require("firebase-functions");
+// functions/index.js
+
+// 1. تعريف onDocumentCreated من مكتبة v2
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+
+// 2. تعريف admin للتعامل مع Firestore و FCM
 const admin = require("firebase-admin");
 
+// 3. تهيئة التطبيق (ضرورية جداً ليعمل admin)
 admin.initializeApp();
 
-exports.sendNotificationOnDetection = functions.firestore
-  .document("detections/{docId}")
-  .onCreate(async (snap, context) => {
-    const docData = snap.data();
+exports.sendNotificationOnDetection = onDocumentCreated("detections/{docId}", async (event) => {
+    const snapshot = event.data;
+    if (!snapshot) {
+        console.log("No data found in snapshot");
+        return null;
+    }
 
-    const detectedLabel = docData.label || "Object"; 
-    const imageUrl = docData.image_url || ""; 
-
-    const message = {
-      notification: {
-        title: `⚠️ Alert: ${detectedLabel} detected!`, 
-        body: `Scarecrow system identified: ${detectedLabel}`,
-      },
-      data: {
-        imageUrl: imageUrl,
-        click_action: "FLUTTER_NOTIFICATION_CLICK",
-      },
-      token: "Test ", // بدل topic
-    };
+    const docData = snapshot.data();
+    const detectedLabel = docData.label || "Object";
 
     try {
-      await admin.messaging().send(message);
-      console.log("Notification sent successfully for label:", detectedLabel);
+        // جلب التوكن الذي رفعه التطبيق (APK) تلقائياً إلى Firestore
+        const tokenDoc = await admin.firestore().collection("users_tokens").doc("admin_user").get();
+        const registrationToken = tokenDoc.data()?.token;
+
+        if (!registrationToken) {
+            console.log("No registration token found in database.");
+            return null;
+        }
+
+        const message = {
+            notification: {
+                title: `⚠️ Alert: ${detectedLabel} detected!`,
+                body: `Scarecrow system identified: ${detectedLabel}`,
+            },
+            token: registrationToken,
+        };
+
+        const response = await admin.messaging().send(message);
+        console.log("Notification sent successfully:", response);
     } catch (error) {
-      console.error("Error sending notification:", error);
+        console.error("Error sending notification:", error);
     }
     return null;
-  });
+});
