@@ -12,6 +12,7 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF1F8E9),
       appBar: AppBar(
         title: const Text('Smart Scarecrow'),
+        automaticallyImplyLeading: false, // هذا السطر سيخفي السهم تماماً
         backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
         elevation: 0,

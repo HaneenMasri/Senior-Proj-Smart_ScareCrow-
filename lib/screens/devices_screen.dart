@@ -7,8 +7,6 @@ class DevicesScreen extends StatelessWidget {
   final VoidCallback onBackToHome;
 
   const DevicesScreen({super.key, required this.onBackToHome});
-
-  // دالة الحذف من فايربيز
   void _deleteDevice(BuildContext context, String docId) {
     showDialog(
       context: context,
@@ -88,7 +86,6 @@ class DevicesScreen extends StatelessWidget {
                   ),
                   itemCount: docs.length,
                   itemBuilder: (context, index) {
-                    // --- الحل هنا: تعريف المتغير داخل الـ itemBuilder ---
                     final deviceData =
                         docs[index].data() as Map<String, dynamic>;
                     final String docId = docs[index].id;

@@ -13,13 +13,10 @@ import 'screens/about_app_screen.dart';
 import 'screens/register_screen.dart';
 import 'app/notification_service.dart';
 
-// --- إضافة دالة حفظ التوكن الجديدة ---
 Future<void> saveTokenToDatabase() async {
   try {
-    // جلب التوكن الخاص بالجهاز الحالي (سواء محاكي أو APK)
     String? token = await FirebaseMessaging.instance.getToken();
     if (token != null) {
-      // تخزين التوكن في Firestore ليقرأه السيرفر تلقائياً
       await FirebaseFirestore.instance
           .collection('users_tokens')
           .doc('admin_user')
@@ -27,10 +24,9 @@ Future<void> saveTokenToDatabase() async {
       print("✅ FCM Token updated in Firestore: $token");
     }
   } catch (e) {
-    print("❌ Error saving token: $e");
+    print("Error saving token: $e");
   }
 }
-// ------------------------------------
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -39,17 +35,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 void main() async {
-  // 1. التهيئة الأساسية
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // 2. تحديث التوكن تلقائياً (الحل السحري للـ APK)
   await saveTokenToDatabase();
-
-  // 3. إعداد الرسائل في الخلفية
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // 4. الاشتراك بالـ topic (كودك الأصلي)
   if (!kIsWeb) {
     try {
       await FirebaseMessaging.instance.subscribeToTopic('scarecrow_alerts');
@@ -61,7 +52,6 @@ void main() async {
     print('Topic subscription skipped: Not supported on Web.');
   }
 
-  // 5. إعدادات Firestore (كودك الأصلي)
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: false,
   );

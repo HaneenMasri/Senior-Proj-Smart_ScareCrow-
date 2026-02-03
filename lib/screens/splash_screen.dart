@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // أضفنا الفيربيس هنا
 import 'welcome_screen.dart';
+import 'main_screen.dart'; // تأكدي من استيراد الشاشة الرئيسية لتطبيقك
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -24,13 +26,28 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
 
+    // هنا المنطق الجديد للفحص
     Future.delayed(const Duration(seconds: 4), () {
       if (mounted) {
+        // فحص حالة المستخدم الحالية
+        User? user = FirebaseAuth.instance.currentUser;
+
+        Widget nextScreen;
+
+        if (user != null) {
+          // إذا كان مسجل دخول -> ارسله للشاشة الرئيسية مباشرة (مثل فيسبوك)
+          nextScreen = const MainScreen();
+        } else {
+          // إذا لم يسجل دخول -> ارسله لصفحة الترحيب/اللوج إن
+          nextScreen = const WelcomeScreen();
+        }
+
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
             transitionDuration: const Duration(milliseconds: 800),
-            pageBuilder: (_, __, ___) => const WelcomeScreen(),
+            pageBuilder: (_, __, ___) =>
+                nextScreen, // نستخدم الشاشة التي حددها الفحص
             transitionsBuilder: (_, animation, __, child) {
               return FadeTransition(opacity: animation, child: child);
             },
@@ -48,6 +65,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    // كود التصميم الخاص بك كما هو بدون تغيير
     final primaryColor = Colors.orange.shade400;
 
     return Scaffold(
@@ -83,9 +101,7 @@ class _SplashScreenState extends State<SplashScreen>
                   height: 200,
                 ),
               ),
-
               const SizedBox(height: 30),
-
               Text(
                 'SCARECROW AI',
                 style: TextStyle(
@@ -95,7 +111,6 @@ class _SplashScreenState extends State<SplashScreen>
                   letterSpacing: 4,
                 ),
               ),
-
               const Text(
                 'INTELLIGENT FARM PROTECTION',
                 style: TextStyle(
@@ -105,9 +120,7 @@ class _SplashScreenState extends State<SplashScreen>
                   fontWeight: FontWeight.w300,
                 ),
               ),
-
               const SizedBox(height: 40),
-
               SizedBox(
                 width: 30,
                 height: 30,
@@ -116,7 +129,6 @@ class _SplashScreenState extends State<SplashScreen>
                   valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                 ),
               ),
-
               const Spacer(),
               const Padding(
                 padding: EdgeInsets.only(bottom: 30),

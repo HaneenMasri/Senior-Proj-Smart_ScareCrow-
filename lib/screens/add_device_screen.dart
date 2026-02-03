@@ -81,7 +81,19 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditMode ? 'Edit Device' : 'New Device'),
+        title: Text(
+          isEditMode ? 'Edit Device' : 'New Device',
+          style: const TextStyle(color: Colors.white),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
+          },
+        ),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Color(0xFF2E7D32),
@@ -99,13 +111,18 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
             ),
             const SizedBox(height: 10),
             const SizedBox(height: 10),
-            const Text(
-              "Setup Your Scarecrow",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            const SizedBox(height: 10),
+            Text(
+              // تغيير النص الأساسي
+              isEditMode ? "Update Settings" : "Setup Your Scarecrow",
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            const Text(
-              "Connect your hardware to the cloud",
-              style: TextStyle(color: Colors.grey),
+            Text(
+              // تغيير النص الفرعي
+              isEditMode
+                  ? "Modify your device information below"
+                  : "Connect your hardware to the cloud",
+              style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 40),
             TextField(

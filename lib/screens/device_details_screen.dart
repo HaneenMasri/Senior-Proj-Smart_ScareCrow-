@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart'; // مكتبة الرسم البياني
 import 'detected_movements_screen.dart';
+import 'package:rxdart/rxdart.dart';
 
 class DeviceDetailsScreen extends StatefulWidget {
   final String deviceId;
@@ -48,7 +49,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
           .collection('camera_control')
           .doc('action')
           .set({
-            'action': 'capture',
+            'action': 'on',
             'timestamp': FieldValue.serverTimestamp(),
           }, SetOptions(merge: true));
 
@@ -94,7 +95,19 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Device: ${widget.deviceId}"),
+        title: Text(
+          "Device: ${widget.deviceId}",
+          style: const TextStyle(color: Colors.white),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
+          },
+        ),
         backgroundColor: Colors.green.shade700,
       ),
       body: StreamBuilder<DocumentSnapshot>(
@@ -185,7 +198,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   Widget _buildConnectingScreen() {
     return Scaffold(
       appBar: AppBar(
-        title: Text("New Device: ${widget.deviceId}"),
+        title: Text(
+          "New Device: ${widget.deviceId}",
+          style: const TextStyle(color: Colors.white),
+        ),
         backgroundColor: Color(0xFF2E7D32),
       ),
       body: Center(
@@ -349,21 +365,51 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   }
 
   Widget _buildImagePreview() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('detections')
-          .orderBy('timestamp', descending: true)
-          .limit(1)
-          .snapshots(),
+    return StreamBuilder<List<QuerySnapshot>>(
+      stream: CombineLatestStream.list([
+        FirebaseFirestore.instance
+            .collection('camera_live_images')
+            .orderBy('timestamp', descending: true)
+            .limit(1)
+            .snapshots(),
+        FirebaseFirestore.instance
+            .collection('detections')
+            .orderBy('timestamp', descending: true)
+            .limit(1)
+            .snapshots(),
+      ]),
       builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        if (!snapshot.hasData ||
+            (snapshot.data![0].docs.isEmpty &&
+                snapshot.data![1].docs.isEmpty)) {
           return _buildPlaceholder();
         }
 
-        var doc = snapshot.data!.docs.first.data() as Map<String, dynamic>;
-        String? url = doc['image_url'];
-        String label = doc['label'] ?? "Scanning...";
-        double confidence = (doc['confidence'] ?? 0.0) * 100;
+        // استخراج أحدث وثيقة من المجموعتين بناءً على الـ timestamp
+        DocumentSnapshot? liveDoc = snapshot.data![0].docs.isNotEmpty
+            ? snapshot.data![0].docs.first
+            : null;
+        DocumentSnapshot? detectDoc = snapshot.data![1].docs.isNotEmpty
+            ? snapshot.data![1].docs.first
+            : null;
+
+        DocumentSnapshot latestDoc;
+        if (liveDoc != null && detectDoc != null) {
+          Timestamp tLive = liveDoc['timestamp'] ?? Timestamp(0, 0);
+          Timestamp tDetect = detectDoc['timestamp'] ?? Timestamp(0, 0);
+          // مقارنة الطوابع الزمنية لعرض الأحدث فعلياً
+          latestDoc = tLive.compareTo(tDetect) > 0 ? liveDoc : detectDoc;
+        } else {
+          latestDoc = liveDoc ?? detectDoc!;
+        }
+
+        var data = latestDoc.data() as Map<String, dynamic>;
+        String? url = data['image_url'];
+        // تحديد النص التوضيحي بناءً على مصدر الصورة
+        String sourceLabel =
+            latestDoc.reference.parent.id == 'camera_live_images'
+            ? "Live Capture"
+            : (data['label'] ?? "Detection");
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,70 +421,65 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
               ),
             ),
-            Stack(
-              children: [
-                Container(
-                  height: 250,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(28),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(28),
-                    child: url != null
-                        ? Image.network(url, fit: BoxFit.contain)
-                        : const SizedBox(),
-                  ),
-                ),
-                Positioned(
-                  bottom: 12,
-                  left: 12,
-                  right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.6),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.psychology,
-                              color: Colors.cyanAccent,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              label.toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          "${confidence.toStringAsFixed(0)}%",
-                          style: const TextStyle(
-                            color: Colors.cyanAccent,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            _imageFrame(url, sourceLabel, data['confidence']),
           ],
         );
       },
+    );
+  }
+
+  // دالة مساعدة لتنسيق واجهة الصورة
+  Widget _imageFrame(String? url, String label, dynamic confidence) {
+    double confPercent = (confidence ?? 0.0) * 100;
+    return Stack(
+      children: [
+        Container(
+          height: 250,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: url != null
+                ? Image.network(url, fit: BoxFit.contain)
+                : const SizedBox(),
+          ),
+        ),
+        Positioned(
+          bottom: 12,
+          left: 12,
+          right: 12,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  label.toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (confPercent > 0)
+                  Text(
+                    "${confPercent.toStringAsFixed(0)}%",
+                    style: const TextStyle(
+                      color: Colors.cyanAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 

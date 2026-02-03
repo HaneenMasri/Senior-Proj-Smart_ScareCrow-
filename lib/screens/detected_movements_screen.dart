@@ -46,9 +46,13 @@ class _DetectedMovementsScreenState extends State<DetectedMovementsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: const Text(
           "Detected Movements",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.green.shade700,
         elevation: 0,
@@ -104,7 +108,7 @@ class _DetectedMovementsScreenState extends State<DetectedMovementsScreen> {
         children: [
           const Text(
             "DETECTED MOVEMENTS",
-            style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
           DropdownButton<String>(
             value: _selectedRange,
