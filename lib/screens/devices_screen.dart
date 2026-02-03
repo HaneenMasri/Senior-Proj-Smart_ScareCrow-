@@ -46,10 +46,7 @@ class DevicesScreen extends StatelessWidget {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             color: Color(0xFF2E7D32), // الشريط الأخضر
-            borderRadius: BorderRadius.only(
-              // bottomLeft: Radius.circular(20),
-              // bottomRight: Radius.circular(20),
-            ),
+            borderRadius: BorderRadius.only(),
           ),
         ),
         title: const Text('My Devices', style: TextStyle(color: Colors.white)),

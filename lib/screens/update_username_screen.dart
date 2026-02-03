@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../screens/login_screen.dart';
+// import '../screens/login_screen.dart';
 
 class UpdateUsernameScreen extends StatefulWidget {
   const UpdateUsernameScreen({super.key});
@@ -13,11 +13,9 @@ class _UpdateUsernameScreenState extends State<UpdateUsernameScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _emailController = TextEditingController();
-  final _currentPasswordController = TextEditingController();
   final _newUsernameController = TextEditingController();
 
   bool _isLoading = false;
-  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -25,23 +23,17 @@ class _UpdateUsernameScreenState extends State<UpdateUsernameScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       _emailController.text = user.email ?? '';
-      if (user.displayName != null) {
-        _newUsernameController.text = user.displayName!;
-      }
     }
   }
 
   @override
   void dispose() {
     _emailController.dispose();
-    _currentPasswordController.dispose();
     _newUsernameController.dispose();
     super.dispose();
   }
 
   void _clearFields() {
-    _emailController.clear();
-    _currentPasswordController.clear();
     _newUsernameController.clear();
   }
 
@@ -54,51 +46,27 @@ class _UpdateUsernameScreenState extends State<UpdateUsernameScreen> {
 
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        throw FirebaseAuthException(
-          code: 'no-user',
-          message: 'No user logged in',
-        );
-      }
+      if (user == null) throw Exception("No user logged in");
 
-      final credential = EmailAuthProvider.credential(
-        email: _emailController.text.trim(),
-        password: _currentPasswordController.text,
-      );
-
-      await user.reauthenticateWithCredential(credential);
-
-      await user.updateDisplayName(_newUsernameController.text.trim());
-      await user.reload();
+      // المنطق الجديد: تحديث الإيميل مباشرة
+      // ملاحظة: فايربيز سيرسل رابط تأكيد للإيميل الجديد
+      await user.verifyBeforeUpdateEmail(_newUsernameController.text.trim());
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Username updated successfully!'),
+            content: Text('Verification link sent to your new email!'),
             backgroundColor: Colors.green,
           ),
         );
-
         _clearFields();
-
         Navigator.pop(context);
       }
     } on FirebaseAuthException catch (e) {
-      String message;
-      if (e.code == 'wrong-password') {
-        message = 'Current password is incorrect';
-      } else if (e.code == 'requires-recent-login') {
-        message = 'Session expired. Please log in again.';
-        if (mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-            (route) => false,
-          );
-        }
-        return;
-      } else {
-        message = e.message ?? 'An error occurred';
+      String message = e.message ?? 'An error occurred';
+
+      if (e.code == 'requires-recent-login') {
+        message = 'Please log out and log in again to change your email.';
       }
 
       if (mounted) {
@@ -108,9 +76,7 @@ class _UpdateUsernameScreenState extends State<UpdateUsernameScreen> {
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -119,114 +85,82 @@ class _UpdateUsernameScreenState extends State<UpdateUsernameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Update Username'),
+        title: const Text('Change Email'),
         backgroundColor: const Color(0xFF2E7D32),
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                'Update Your Username',
+                'Update Your Email Address',
                 style: TextStyle(
-                  fontSize: 26,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF2E7D32),
                 ),
-                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
 
-              // Email Field
               TextFormField(
                 controller: _emailController,
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: 'Current Email',
+                  prefixIcon: Icon(Icons.email_outlined),
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Color(0xFFF5F5F5),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // حقل الإيميل الجديد
+              TextFormField(
+                controller: _newUsernameController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email),
+                  labelText: 'New Email Address',
+                  prefixIcon: Icon(Icons.mark_email_read_outlined),
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
+                  if (value == null || value.isEmpty)
+                    return 'Please enter new email';
                   if (!RegExp(
                     r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                   ).hasMatch(value)) {
-                    return 'Please enter a valid email';
+                    return 'Enter a valid email';
+                  }
+                  if (value.trim() == _emailController.text.trim()) {
+                    return 'Must be different from current email';
                   }
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
 
-              TextFormField(
-                controller: _currentPasswordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: 'Current Password',
-                  prefixIcon: const Icon(Icons.lock),
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _updateUsername,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2E7D32),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
                   ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Update Email',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your current password';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-
-              TextFormField(
-                controller: _newUsernameController,
-                decoration: const InputDecoration(
-                  labelText: 'New Username',
-                  prefixIcon: Icon(Icons.person),
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a new username';
-                  }
-                  if (value.trim().length < 4) {
-                    return 'Username must be at least 4 characters';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 40),
-
-              ElevatedButton(
-                onPressed: _isLoading ? null : _updateUsername,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E7D32),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'Update Username',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
               ),
             ],
           ),

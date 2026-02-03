@@ -1,6 +1,8 @@
+//screens/main_screen.dart
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'devices_screen.dart';
+import 'settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -10,10 +12,8 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // 0 يعني سيبدأ دائماً بصفحة الـ Home
   int _selectedIndex = 0;
 
-  // دالة لتغيير الصفحة من أي مكان داخل التطبيق
   void changePage(int index) {
     setState(() {
       _selectedIndex = index;
@@ -22,16 +22,14 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // قائمة الصفحات
-    final List<Widget> _pages = [
+    final List<Widget> pages = [
       const HomeScreen(),
-      // نمرر الدالة changePage لصفحة الأجهزة لنتمكن من استخدامها في زر الرجوع
       DevicesScreen(onBackToHome: () => changePage(0)),
-      const SettingsScreen(),
+      SettingsScreen(onBackToHome: () => changePage(0)),
     ];
 
     return Scaffold(
-      body: _pages[_selectedIndex],
+      body: pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (i) => setState(() => _selectedIndex = i),
@@ -55,21 +53,6 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        backgroundColor: const Color(0xFF2E7D32),
-        foregroundColor: Colors.white,
-      ),
-      body: const Center(child: Text("Settings Content")),
     );
   }
 }
